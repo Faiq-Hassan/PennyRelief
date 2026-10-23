@@ -19,6 +19,8 @@ app.use(cors({
     const allowedOrigins = [
       'http://localhost:8081',
       'http://localhost:5173',
+      'https://pennyrelief.autosols.com',
+      'http://pennyrelief.autosols.com',
       'https://100-s-rupee-bank-admin-portal-production.up.railway.app'
     ];
 
