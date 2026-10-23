@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "NFC_100_bank",
+    "slug": "NFC_100_bank",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/LogoImg.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/LogoImg.png",
+      "resizeMode": "contain",
+      "backgroundColor": "rgba(3, 9, 96, 1)"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/images/LogoImg.png",
+        "resizeMode": "contain",
+        "backgroundColor": "rgba(3, 9, 96, 1)"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "package": "com.nfc.bank100",
+        "foregroundImage": "./assets/images/LogoImg.png",
+        "backgroundColor": "rgba(3, 9, 96, 1)"
+      },
+      "splash": {
+        "mdpi": "./assets/images/LogoImg.png",
+        "hdpi": "./assets/images/LogoImg.png",
+        "xhdpi": "./assets/images/LogoImg.png",
+        "xxhdpi": "./assets/images/LogoImg.png",
+        "xxxhdpi": "./assets/images/LogoImg.png",
+        "resizeMode": "contain",
+        "backgroundColor": "rgba(3, 9, 96, 1)"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/LogoImg.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/LogoImg.png",
+          "resizeMode": "contain",
+          "backgroundColor": "rgba(3, 9, 96, 1)"
+        }
+      ],
+      [
+        "expo-font"
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
