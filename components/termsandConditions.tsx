@@ -8,15 +8,15 @@ export default function TermsAndConditions() {
 
       <Text style={styles.sectionTitle}>1. Introduction</Text>
       <Text style={styles.text}>
-        Welcome to 100's Rupees Bank (“the App”). This App facilitates interest-free loans
-        to needy individuals and students for educational and business purposes, funded by monthly donations from users.
+        Welcome to PennyRelief (“the App”). This App facilitates micro-donations and interest-free relief loans
+        to needy individuals and students for educational and emergency purposes, powered by community micro-donations.
         By accessing or using the App, you agree to be bound by these Terms and Conditions.
       </Text>
 
       <Text style={styles.sectionTitle}>2. Eligibility</Text>
       <Text style={styles.text}>
-        You must be at least 18 years old to use this App. Students and needy individuals can apply for loans.
-        Donors agree to contribute ₹100 or more monthly as donations.
+        You must be at least 18 years old to use this App. Students and needy individuals can apply for relief loans.
+        Donors agree to contribute small pennies, recurring micro-donations, or lump-sum contributions.
       </Text>
 
       <Text style={styles.sectionTitle}>3. Donations</Text>
@@ -57,7 +57,7 @@ export default function TermsAndConditions() {
 
       <Text style={styles.sectionTitle}>9. Intellectual Property</Text>
       <Text style={styles.text}>
-        All content, trademarks, and data on the App are the property of 100's Rupees Bank or its licensors.
+        All content, trademarks, and data on the App are the property of PennyRelief or its licensors.
         Users may not reproduce or distribute content without permission.
       </Text>
 

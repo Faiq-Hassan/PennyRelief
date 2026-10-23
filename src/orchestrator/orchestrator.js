@@ -1,5 +1,5 @@
 /**
- * Orchestrator Module: NFC 100's Rupee Bank Loan Intelligence Engine
+ * Orchestrator Module: PennyRelief Loan & Micro-Donation Intelligence Engine
  * 
  * Conducts specialist agents in a strict sequence:
  * 1. DocumentParser: Ingests & structures application documents.

@@ -1,8 +1,8 @@
 Security Policy
 
-NFC 100's Rupee Bank
+PennyRelief • Student Micro-Donation & Relief Bank
 
-Thank you for helping us keep the NFC 100's Rupee Bank project secure.
+Thank you for helping us keep the PennyRelief project secure.
 
 This project handles sensitive information such as user accounts, authentication credentials, student information, loan applications, uploaded documents, transactions, and payment-related data. Security issues should be reported responsibly and privately.
 
@@ -101,7 +101,7 @@ The backend also integrates services such as MongoDB, Cloudinary, Nodemailer, an
 
 Scope
 
-This security policy applies to the NFC 100's Rupee Bank frontend and backend repositories maintained under:
+This security policy applies to the PennyRelief frontend and backend repositories maintained under:
 
 - "Muhammadrabeet56/100-s-Rupee-Bank-front-end"
 - "Muhammadrabeet56/100-s-Bank-Back-end"
@@ -113,4 +113,4 @@ For security-related concerns:
 Muhammad Rabeet
 Email: muhammadrabeet15@gmail.com
 
-Thank you for helping us keep NFC 100's Rupee Bank secure.
+Thank you for helping us keep PennyRelief secure.

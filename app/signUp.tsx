@@ -155,7 +155,7 @@ const SignupScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f3fbf6" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -166,12 +166,12 @@ const SignupScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           {isLoading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" color="#ff8f6b" />
           ) : (
             <>
-              <Text style={styles.head}>Join the 100’s rs Movement</Text>
+              <Text style={styles.head}>Join PennyRelief</Text>
               <Text style={styles.text}>
-                Join the student-powered support system.
+                Every penny counts • Autonomous student micro-donations & relief fund.
               </Text>
 
               <View style={styles.imageUploaderContainer}>
@@ -388,34 +388,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "rgba(206,240,249,1)",
+    backgroundColor: "#ffffff",
+    borderWidth: 1.5,
+    borderColor: "#d8ede1",
     gap: 6,
-    padding: width * 0.03,
-    borderRadius: 8,
-    marginTop: height * 0.03,
+    padding: width * 0.035,
+    borderRadius: 16,
+    marginTop: height * 0.02,
   },
   inputContainerFocused: {
-    borderColor: "rgba(62,180,219,1)",
-    borderWidth: 2,
+    borderColor: "#34d399",
   },
   input: {
     width: width * 0.75,
-    fontSize: height * 0.02,
-    color: "black",
+    fontSize: 15,
+    color: "#072a1e",
   },
   loginBtn: {
     flexDirection: "row",
-    backgroundColor: "rgba(3,9,96,1)",
+    backgroundColor: "#ff8f6b",
     padding: height * 0.02,
-    marginTop: height * 0.05,
-    borderRadius: 8,
+    marginTop: height * 0.04,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#ff8f6b",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   btnText: {
     color: "white",
-    fontSize: height * 0.022,
+    fontSize: 16,
     fontWeight: "bold",
   },
   btnIcon: {
@@ -428,14 +433,15 @@ const styles = StyleSheet.create({
     marginTop: height * 0.02,
   },
   accountText: {
-    fontSize: height * 0.02,
-    color: "rgba(3,9,96,1)",
+    fontSize: 14,
+    color: "#194f3b",
   },
   signUpText: {
     marginLeft: 5,
-    fontSize: height * 0.02,
+    fontSize: 14,
     fontWeight: "bold",
-    color: "rgba(3,9,96,1)",
+    color: "#072a1e",
+    textDecorationLine: "underline",
   },
   errorText: {
     color: "red",

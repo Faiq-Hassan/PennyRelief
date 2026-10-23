@@ -71,7 +71,7 @@ const Settings = () => {
         {/* Header */}
         <View style={styles.topMain}>
           <View style={styles.profileInfo}>
-            <Text style={styles.bankTitle}>100's Rupees Bank</Text>
+            <Text style={styles.bankTitle}>PennyRelief</Text>
             <Text style={styles.tagline}>Manage Your Account Settings</Text>
           </View>
         </View>
@@ -111,16 +111,16 @@ const Settings = () => {
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
               <Text style={styles.modalTitle}>Terms and Conditions</Text>
               <Text style={styles.modalParagraph}>
-                Welcome to 100's Rupees Bank. By using our platform, you agree to comply with the following terms and conditions.
+                Welcome to PennyRelief. By using our platform, you agree to comply with the following terms and conditions.
               </Text>
               <Text style={styles.modalParagraph}>
                 1. <Text style={styles.bold}>Eligibility:</Text> You must be at least 18 years old to participate.
               </Text>
               <Text style={styles.modalParagraph}>
-                2. <Text style={styles.bold}>Interest-Free Loans:</Text> Our platform provides loans without interest, intended solely for educational and small business purposes.
+                2. <Text style={styles.bold}>Interest-Free Loans & Relief:</Text> Our platform provides relief loans without interest, intended solely for educational and emergency purposes.
               </Text>
               <Text style={styles.modalParagraph}>
-                3. <Text style={styles.bold}>Contributions:</Text> Every member contributes ₹100 monthly to fund the interest-free loan pool.
+                3. <Text style={styles.bold}>Micro-Donations:</Text> Every member contributes small pennies monthly to fund the transparent community relief pool.
               </Text>
               <Text style={styles.modalParagraph}>
                 4. <Text style={styles.bold}>Repayments:</Text> Borrowers must repay loans on time as agreed to maintain fairness and sustainability.
@@ -172,12 +172,12 @@ const Settings = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-              <Text style={styles.modalTitle}>About 100's Rupees Bank</Text>
+              <Text style={styles.modalTitle}>About PennyRelief</Text>
               <Text style={styles.modalParagraph}>
-                Welcome to <Text style={styles.bold}>100's Rupees Bank</Text>, a unique interest-free loan platform dedicated to empowering students and aspiring entrepreneurs.
+                Welcome to <Text style={styles.bold}>PennyRelief</Text>, a unique micro-donation and student relief platform dedicated to empowering students and aspiring scholars.
               </Text>
               <Text style={styles.modalParagraph}>
-                Our mission is to create a community where everyone can contribute just ₹100 per month to help those in need get access to interest-free loans. These loans support education and small businesses, enabling individuals to improve their lives without the burden of debt.
+                Our mission is to create a community where everyone can contribute small pennies per month to help those in need get access to interest-free relief. These micro-donations support education and emergency needs, enabling students to graduate without the burden of debt.
               </Text>
               <Text style={styles.modalParagraph}>
                 By fostering a culture of mutual support, transparency, and trust, we aim to make financial assistance accessible and ethical.

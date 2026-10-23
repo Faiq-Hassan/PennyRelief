@@ -5,9 +5,9 @@ function Header() {
   return (
       <View style={styles.topMain}>
            <View style={styles.profileInfo}>
-             <Text style={styles.donationHead}>100's Rupees Bank</Text>
-             <Text style={styles.amount}>Empowering Lives Through Interest-Free Support</Text>
-             <Text style={styles.amount}>See the Impact We Create Together.</Text>
+             <Text style={styles.donationHead}>PennyRelief</Text>
+             <Text style={styles.amount}>Every Penny Counts • Student Micro-Donation & Relief</Text>
+             <Text style={styles.amount}>Empowering Lives Through Transparent Community Support</Text>
            </View>
          </View>
   )

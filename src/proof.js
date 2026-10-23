@@ -13,7 +13,7 @@ async function runProof() {
   clearGemmaCallHistory();
 
   console.log('================================================================================');
-  console.log('      NFC 100\'S RUPEE BANK - GEMMA 4 MULTI-AGENT PROOF VERIFICATION             ');
+  console.log('         PENNYRELIEF - GEMMA 4 MULTI-AGENT PROOF VERIFICATION                   ');
   console.log('================================================================================\n');
 
   const provider = (process.env.LLM_PROVIDER || 'ollama').toLowerCase();
@@ -25,11 +25,11 @@ async function runProof() {
 
   const sampleApplication = {
     studentName: 'Hamza Tariq',
-    regNo: 'NFC-2023-CS-042',
+    regNo: 'PNY-2023-CS-042',
     dept: 'Computer Science',
     semester: '5th',
     cgpa: 3.52,
-    email: 'hamza.tariq@student.nfc.edu.pk',
+    email: 'hamza.tariq@student.pennyrelief.org',
     phoneNo: '03001234567',
     loanAmount: 25000,
     loanPurpose: 'Semester 5 Tuition Fee & Examination Registration',

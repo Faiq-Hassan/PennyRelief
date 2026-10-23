@@ -62,7 +62,7 @@ Rules:
 - recommendation must be 'APPROVE', 'CONDITIONAL_APPROVAL', or 'REJECT'
 - approvedAmount cannot exceed maxEligibleAmount (${analysis.maxEligibleAmount})
 - tenureMonths must be between 3 and 12
-- monthlyEmi must be approvedAmount divided by tenureMonths (subsidized by 100's Rupee micro-donations)
+- monthlyEmi must be approvedAmount divided by tenureMonths (subsidized by community penny micro-donations)
 - subsidyGranted: boolean (true if student qualifies for 0% interest support)
 - conditions: array of strings containing standard student compliance terms`;
 

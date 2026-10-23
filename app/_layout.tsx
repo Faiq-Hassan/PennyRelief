@@ -35,7 +35,6 @@ export default function RootLayout() {
           initialRouteName="index"
           screenOptions={{ headerShown: false }} // Ensure screenOptions is correctly applied
         >
-          toast
           {/* Ensure all routes are correctly defined */}
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -43,7 +42,7 @@ export default function RootLayout() {
           <Stack.Screen name="otpVerification" options={{ headerShown: false }} />
           <Stack.Screen name="resendOtp" options={{ headerShown: false }} />
           <Stack.Screen name="personalInfo" options={{ headerShown: false }} />
-          <Stack.Screen name="profileupdtae" options={{ headerShown: false }} />
+          <Stack.Screen name="profileupdate" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           
         </Stack>

@@ -1,40 +1,21 @@
 {
   "expo": {
-    "name": "NFC_100_bank",
-    "slug": "NFC_100_bank",
+    "name": "PennyRelief",
+    "slug": "penny-relief",
     "version": "1.0.0",
+    "sdkVersion": "58.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/LogoImg.png",
-    "scheme": "myapp",
+    "icon": "./assets/images/icon.png",
+    "scheme": "pennyrelief",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/LogoImg.png",
-      "resizeMode": "contain",
-      "backgroundColor": "rgba(3, 9, 96, 1)"
-    },
     "ios": {
-      "supportsTablet": true,
-      "splash": {
-        "image": "./assets/images/LogoImg.png",
-        "resizeMode": "contain",
-        "backgroundColor": "rgba(3, 9, 96, 1)"
-      }
+      "supportsTablet": true
     },
     "android": {
+      "package": "com.pennyrelief.app",
       "adaptiveIcon": {
-        "package": "com.nfc.bank100",
-        "foregroundImage": "./assets/images/LogoImg.png",
-        "backgroundColor": "rgba(3, 9, 96, 1)"
-      },
-      "splash": {
-        "mdpi": "./assets/images/LogoImg.png",
-        "hdpi": "./assets/images/LogoImg.png",
-        "xhdpi": "./assets/images/LogoImg.png",
-        "xxhdpi": "./assets/images/LogoImg.png",
-        "xxxhdpi": "./assets/images/LogoImg.png",
-        "resizeMode": "contain",
-        "backgroundColor": "rgba(3, 9, 96, 1)"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#030960"
       }
     },
     "web": {
@@ -49,7 +30,7 @@
         {
           "image": "./assets/images/LogoImg.png",
           "resizeMode": "contain",
-          "backgroundColor": "rgba(3, 9, 96, 1)"
+          "backgroundColor": "#030960"
         }
       ],
       [

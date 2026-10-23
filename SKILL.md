@@ -1,11 +1,11 @@
 ---
-name: nfc-100s-bank
-description: Autonomous multi-agent loan assessment and verification skill for NFC 100's Rupee Bank.
+name: penny-relief
+description: Autonomous multi-agent donation assessment and student relief verification skill for PennyRelief.
 ---
 
 ## Purpose
-NFC 100's Rupee Bank evaluates student micro-loan requests against academic, financial, and regulatory criteria.
-The system ingests applicant records and documents, estimates household repayment capacity, and builds subsidized loan packages.
+PennyRelief evaluates student micro-donation and emergency relief requests against academic, financial, and regulatory criteria.
+The system ingests applicant records and documents, estimates household financial need capacity, and builds subsidized relief packages.
 A strict compliance agent verifies regulatory limits and loops back revisions until statutory standards are satisfied.
 
 ## Hard Rules
@@ -74,7 +74,7 @@ A strict compliance agent verifies regulatory limits and loops back revisions un
 - Failure behavior: Return riskScore 25, Tier-A, and maxEligibleAmount equal to requested amount capped at 50,000 PKR.
 
 ## decisionBuilder
-- Role: Formulates final repayment schedule, monthly EMI, and 100's Rupee micro-donation subsidy allocations.
+- Role: Formulates final repayment schedule, monthly EMI, and penny micro-donation subsidy allocations.
 - Input: `parsedStudent`, `financialBaseline`, and `analysis` from earlier agents.
 - Steps:
   1. Set approvedAmount as minimum of requested amount and analyst maxEligibleAmount.

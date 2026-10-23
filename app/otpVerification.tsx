@@ -1,7 +1,6 @@
 import { API_ENDPOINTS } from "@/constants/Project.Api";
-import { useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { useNavigation } from "expo-router";
+import { useNavigation, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import Toast from "react-native-toast-message";
@@ -12,8 +11,8 @@ export default function OtpVerification() {
   const [isLoading , setIsLoading] = useState(false); // State for loading indicator
   const inputs = useRef([]);
   const navigation = useNavigation();
-  const route = useRoute(); // Access the route object // Destructure the email from route params
-  const {email} = route.params; // Destructure the email from route params
+  const params = useLocalSearchParams<{ email?: string }>();
+  const email = params?.email || "";
   console.log(email);
   const handleVerifyOtp = async() => {
     const fullOtp = otp.join(""); // Join the OTP digits into a single string
@@ -25,7 +24,7 @@ export default function OtpVerification() {
       setIsLoading(true); // Set loading state to true
       try {
         const response = await axios.post(API_ENDPOINTS.Otp,{
-          email: route?.params?.email,
+          email: email || params?.email,
           otp: fullOtp,
         },{
           headers: {
@@ -96,7 +95,7 @@ export default function OtpVerification() {
 
           <TextInput
             style={styles.emailInput}
-            placeholder={route.params.email}
+            placeholder={email || "your-email@nfc.edu.pk"}
             placeholderTextColor="#999"
             keyboardType="email-address"
             value={email}
