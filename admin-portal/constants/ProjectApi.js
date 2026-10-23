@@ -1,7 +1,9 @@
 
 
-// Reads from .env (VITE_API_URL) with fallback to local backend
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// In production behind Nginx, use relative origin ('') to guarantee HTTPS same-origin requests
+export const API_URL = import.meta.env.PROD 
+  ? '' 
+  : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
 export const ADMIN_API_ENDPOINTS = {
   login: `${API_URL}/admin/login`,
   fetchDonations: `${API_URL}/admin/stripe/payers`,
