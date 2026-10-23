@@ -9,7 +9,7 @@ const { loadAgentSkill } = require('../llm/skillLoader');
 
 const complianceCheckerSchema = {
   type: 'object',
-  required: ['passed', 'sendBackTo', 'feedback', 'verifiedDecision'],
+  required: ['passed', 'feedback', 'verifiedDecision'],
   properties: {
     passed: { type: 'boolean' },
     sendBackTo: { type: ['string', 'null'] },

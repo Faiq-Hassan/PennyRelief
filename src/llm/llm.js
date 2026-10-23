@@ -37,7 +37,7 @@ function validateSchema(data, schema) {
   if (!schema || typeof schema !== 'object') return true;
   if (schema.type === 'object' && schema.required && Array.isArray(schema.required)) {
     for (const req of schema.required) {
-      if (data[req] === undefined || data[req] === null) {
+      if (data[req] === undefined) {
         throw new Error(`Schema validation error: missing required property "${req}"`);
       }
     }
@@ -60,7 +60,9 @@ async function askGemma({ system = '', user = '', images = [], jsonSchema = null
   const provider = (process.env.LLM_PROVIDER || 'ollama').toLowerCase();
   const timeoutMs = 120000; // 120 seconds timeout
 
-  const modelId = provider === 'gemini' ? 'gemma-4-26b-a4b-it' : 'gemma4:e4b';
+  const modelId = provider === 'gemini' 
+    ? (process.env.GEMINI_MODEL || 'gemini-flash-lite-latest') 
+    : 'gemma4:e4b';
 
   async function executeCall(attemptPrompt) {
     const startTime = Date.now();
@@ -71,7 +73,7 @@ async function askGemma({ system = '', user = '', images = [], jsonSchema = null
         throw new Error('GEMINI_API_KEY environment variable is required when LLM_PROVIDER=gemini');
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
 
       const contents = [];
       const parts = [];
@@ -101,8 +103,7 @@ async function askGemma({ system = '', user = '', images = [], jsonSchema = null
         body: JSON.stringify({
           contents,
           generationConfig: {
-            temperature: 0.1,
-            responseMimeType: 'application/json'
+            temperature: 0.1
           }
         }),
         signal: AbortSignal.timeout(timeoutMs)
@@ -115,7 +116,9 @@ async function askGemma({ system = '', user = '', images = [], jsonSchema = null
 
       const resData = await res.json();
       const latencyMs = Date.now() - startTime;
-      const rawText = resData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const responseParts = resData?.candidates?.[0]?.content?.parts || [];
+      const nonThought = responseParts.filter(p => !p.thought);
+      const rawText = (nonThought.length > 0 ? nonThought[nonThought.length - 1].text : responseParts[0]?.text) || '';
       return { rawText, latencyMs };
     } else {
       // Default: Ollama provider
@@ -161,9 +164,23 @@ async function askGemma({ system = '', user = '', images = [], jsonSchema = null
   let parsedJson = null;
   let lastError = null;
 
+  function extractJson(text) {
+    if (!text) throw new Error('Empty model response');
+    const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    try {
+      return JSON.parse(cleaned);
+    } catch (e) {
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw e;
+    }
+  }
+
   try {
     result = await executeCall(user);
-    parsedJson = JSON.parse(result.rawText.trim());
+    parsedJson = extractJson(result.rawText);
     if (jsonSchema) {
       validateSchema(parsedJson, jsonSchema);
     }
@@ -173,8 +190,7 @@ async function askGemma({ system = '', user = '', images = [], jsonSchema = null
     try {
       const retryPrompt = `${user}\n\nIMPORTANT: Your previous output could not be parsed as valid JSON or failed schema. You MUST return ONLY a strictly valid JSON object matching this schema. No markdown formatting, no code blocks, only raw JSON.`;
       result = await executeCall(retryPrompt);
-      const cleaned = result.rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-      parsedJson = JSON.parse(cleaned);
+      parsedJson = extractJson(result.rawText);
       if (jsonSchema) {
         validateSchema(parsedJson, jsonSchema);
       }

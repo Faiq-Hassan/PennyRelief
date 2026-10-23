@@ -5,6 +5,7 @@
  * and prints an auditable table of every Gemma 4 call (Agent, Model ID, Provider, Latency, Output Snippet).
  */
 
+require('dotenv').config();
 const { runJob } = require('./orchestrator/orchestrator');
 const { getGemmaCallHistory, clearGemmaCallHistory } = require('./llm/llm');
 
