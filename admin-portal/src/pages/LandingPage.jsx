@@ -233,27 +233,6 @@ export default function LandingPage() {
 
           {/* Phone Display with Surrounding Icon Grid */}
           <div className="relative mt-16 flex items-center justify-center">
-            {/* Left Cloud of Department Icons */}
-            <div className="hidden lg:flex flex-col gap-5 absolute left-12 top-1/2 -translate-y-1/2">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: -3 }}
-                className="w-14 h-14 rounded-2xl bg-[#0b3324] border border-[#1b5840] flex items-center justify-center text-xl shadow-lg shadow-black/40 text-[#34d399]"
-              >
-                💻
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 3 }}
-                className="w-14 h-14 rounded-2xl bg-[#ff8f6b]/20 border border-[#ff8f6b]/40 flex items-center justify-center text-xl shadow-lg shadow-black/40 text-[#ff8f6b]"
-              >
-                ⚡
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: -2 }}
-                className="w-14 h-14 rounded-2xl bg-[#0b3324] border border-[#1b5840] flex items-center justify-center text-xl shadow-lg shadow-black/40 text-[#6ee7b7]"
-              >
-                ⚙️
-              </motion.div>
-            </div>
 
             {/* Central Realistic iPhone Mockup */}
             <motion.div
@@ -331,27 +310,6 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Right Cloud of Department Icons */}
-            <div className="hidden lg:flex flex-col gap-5 absolute right-12 top-1/2 -translate-y-1/2">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 2 }}
-                className="w-14 h-14 rounded-2xl bg-[#0b3324] border border-[#1b5840] flex items-center justify-center text-xl shadow-lg shadow-black/40 text-[#34d399]"
-              >
-                🧪
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: -3 }}
-                className="w-14 h-14 rounded-2xl bg-[#ff8f6b]/20 border border-[#ff8f6b]/40 flex items-center justify-center text-xl shadow-lg shadow-black/40 text-[#ff8f6b]"
-              >
-                🏗️
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 3 }}
-                className="w-14 h-14 rounded-2xl bg-[#0b3324] border border-[#1b5840] flex items-center justify-center text-xl shadow-lg shadow-black/40 text-[#6ee7b7]"
-              >
-                📚
-              </motion.div>
-            </div>
           </div>
 
           {/* Trust Ticker Badges */}
