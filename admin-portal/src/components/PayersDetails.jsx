@@ -29,38 +29,67 @@ const PaymentTable = () => {
   });
   const [exchangeRate, setExchangeRate] = useState(280);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(ADMIN_API_ENDPOINTS.fetchDonations);
-        if (response.data?.success) {
-          setPayments(response.data.data?.payments || []);
-          setTestMode(response.data.testMode || false);
-          if (response.data.data?.account_balance) {
-            setAccountBalance(response.data.data.account_balance);
-          }
-          if (response.data.data?.exchange_rate) {
-            setExchangeRate(response.data.data.exchange_rate);
-          }
-          if (response.data.data?.summary) {
-            setAnalytics(response.data.data.summary);
-            const s = response.data.data.summary;
-            setSummary({
-              totalPayments: s.thisMonth.count + s.lastMonth.count,
-              totalAmountUSD: s.thisMonth.amount_usd + s.lastMonth.amount_usd,
-              totalAmountPKR: s.thisMonth.amount_pkr + s.lastMonth.amount_pkr,
-              successfulPayments: s.thisMonth.count + s.lastMonth.count,
-              totalFeesUSD: s.thisMonth.fees_usd + s.lastMonth.fees_usd
-            });
-          }
-        } else throw new Error('Unexpected data format from server');
-      } catch (error) {
-        setError(error.message);
-        setPayments([]);
-      } finally {
-        setLoading(false);
+  const exportLedgerCSV = () => {
+    if (payments.length === 0) return;
+    const header = ['Customer Name', 'Customer Email', 'Payment Link', 'Amount (USD)', 'Amount (PKR)', 'Fee (USD)', 'Method', 'Date', 'Status'];
+    const rows = payments.map(p => [
+      p.customer?.name || 'N/A',
+      p.customer?.email || 'N/A',
+      p.payment_link?.name || 'N/A',
+      p.amount?.usd || '',
+      p.amount?.pkr || '',
+      p.fee?.usd || '',
+      p.payment_method?.details?.brand ? `${p.payment_method.details.brand} ****${p.payment_method.details.last4}` : (p.payment_method?.type || 'N/A'),
+      p.created ? new Date(p.created).toLocaleString() : 'N/A',
+      p.status || 'N/A',
+    ]);
+    const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `PennyRelief_Donations_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(ADMIN_API_ENDPOINTS.fetchDonations);
+      if (response.data?.success) {
+        setPayments(response.data.data?.payments || []);
+        setTestMode(response.data.testMode || false);
+        if (response.data.data?.account_balance) {
+          setAccountBalance(response.data.data.account_balance);
+        }
+        if (response.data.data?.exchange_rate) {
+          setExchangeRate(response.data.data.exchange_rate);
+        }
+        if (response.data.data?.summary) {
+          setAnalytics(response.data.data.summary);
+          const s = response.data.data.summary;
+          setSummary({
+            totalPayments: s.thisMonth.count + s.lastMonth.count,
+            totalAmountUSD: s.thisMonth.amount_usd + s.lastMonth.amount_usd,
+            totalAmountPKR: s.thisMonth.amount_pkr + s.lastMonth.amount_pkr,
+            successfulPayments: s.thisMonth.count + s.lastMonth.count,
+            totalFeesUSD: s.thisMonth.fees_usd + s.lastMonth.fees_usd
+          });
+        }
+      } else {
+        throw new Error('Unexpected data format from server');
       }
-    };
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || 'Failed to fetch donation records');
+      setPayments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -110,7 +139,7 @@ const PaymentTable = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
       </div>
     );
@@ -118,9 +147,15 @@ const PaymentTable = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen px-4">
+      <div className="flex justify-center items-center py-20 px-4">
         <div className="bg-red-50 border-l-4 border-red-500 p-4 max-w-md w-full rounded">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm text-red-700 mb-3">{error}</p>
+          <button
+            onClick={fetchData}
+            className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -154,8 +189,12 @@ const PaymentTable = () => {
             <p className="text-[#5f8574] text-xs mt-0.5">Community contributions routed via Stripe & PayFast for student emergency relief</p>
             {testMode && <div className="text-xs font-bold text-amber-700 mt-1">● Sandbox Mode: Active Ledger Simulator</div>}
           </div>
-          <button className="px-4 py-2 bg-[#e2f3e9] hover:bg-[#c1e8d5] text-[#072a1e] font-bold rounded-xl text-xs transition-all">
-            Export Ledger
+          <button
+            onClick={exportLedgerCSV}
+            disabled={payments.length === 0}
+            className="px-4 py-2 bg-[#e2f3e9] hover:bg-[#c1e8d5] text-[#072a1e] font-bold rounded-xl text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+          >
+            ↓ Export CSV
           </button>
         </div>
 

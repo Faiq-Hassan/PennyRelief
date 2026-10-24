@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FaUserShield, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FaUserShield, FaLock, FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ADMIN_API_ENDPOINTS } from '../../constants/ProjectApi';
@@ -10,26 +10,40 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // If already logged in, skip to dashboard
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) navigate('/home', { replace: true });
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
     try {
       const response = await axios.post(ADMIN_API_ENDPOINTS.login, { email, password }, {
         headers: { 'Content-Type': 'application/json' }
       });
-      console.log('Login response:', response.data);
       if (response.data && response.data.Token) {
-        localStorage.setItem('token', response.data.Token);
-        navigate('/home');
+        // rememberMe = persist in localStorage; else sessionStorage (clears on tab close)
+        if (rememberMe) {
+          localStorage.setItem('token', response.data.Token);
+        } else {
+          sessionStorage.setItem('token', response.data.Token);
+        }
+        navigate('/home', { replace: true });
       } else {
-        setError(response.data.message || 'Login failed');
+        setError(response.data.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || 'Network error'
+        err.response?.data?.message || 'Unable to connect. Please check your network.'
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,9 +150,15 @@ const LoginPage = () => {
             <div>
               <button 
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
-              > 
-                Sign in
+                disabled={isLoading}
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Signing in...
+                  </>
+                ) : 'Sign in'}
               </button>
             </div>
           </form>

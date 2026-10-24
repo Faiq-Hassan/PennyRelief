@@ -21,9 +21,6 @@ function Loan() {
         axios.get(ADMIN_API_ENDPOINTS.fetchApplications),
         axios.get(ADMIN_API_ENDPOINTS.fetchUsers)
       ]);
-      console.log('Applications Response:', applicationsResponse.data.applications);
-      console.log('Users Response:', usersResponse.data.user);
-
       if (applicationsResponse.status === 200 && usersResponse.status === 200) {
         setLoanApplications(applicationsResponse.data.applications || []);
         setUsers(usersResponse.data.users || []);
@@ -31,11 +28,9 @@ function Loan() {
         setLoanApplications([]);
         setUsers([]);
       }
-      console.log('Loan Applications:',loanApplications );
       setError(null);
     } catch (err) {
-      setError(err.message);
-      console.error('Error fetching data:', err);
+      setError(err?.response?.data?.message || err.message || 'Error fetching data');
     } finally {
       setLoading(false);
     }
@@ -44,23 +39,12 @@ function Loan() {
   useEffect(() => {
     fetchData();
   }, []);
-  
 
-  // const getApplicationWithUser = (application) => {
-  //   const user = users.find(u => u._id === application.user);
-  //   return {
-  //     ...application,
-  //     user: user || null
-  //   };
-  // };
-  // console.log('Loan Applications with User:', getApplicationWithUser(loanApplications));
-
-  const updateApplicationStatus = async (applicationId,userID,loanAmount,loanPurpose, newStatus ) => {
-    console.log('Updating Application ID:', applicationId, 'to Status:', newStatus, 'for User ID:', userID);
+  const updateApplicationStatus = async (applicationId, userID, loanAmount, loanPurpose, newStatus) => {
     try {
       const response = await axios.patch(
         `${ADMIN_API_ENDPOINTS.updateloan}/${applicationId}`,
-        { status: newStatus , userID: userID , loanAmount: loanAmount, loanPurpose: loanPurpose }
+        { status: newStatus, userID: userID, loanAmount: loanAmount, loanPurpose: loanPurpose }
       );
       
       if (response.status === 200) {
@@ -69,7 +53,7 @@ function Loan() {
         ));
       }
     } catch (err) {
-      console.error('Error updating status:', err);
+      alert(`Failed to update application status: ${err?.response?.data?.message || err.message}`);
     }
   };
 

@@ -45,17 +45,20 @@ const Dashboard = () => {
   const [status , setStatusCount] = useState({ approved: 0, pending: 0, rejected: 0 });
   const navigate = useNavigate();
 
-  console.log(users)
 const fetchUsers = async () => {
     try {
       setLoading(true);
       const response = await axios.get(ADMIN_API_ENDPOINTS.fetchUsers);
-      const status = await axios.get(ADMIN_API_ENDPOINTS.loanstatus);
-      const statusCount = status.data.statusCounts || { approved: 0, pending: 0, rejected: 0 };
-      console.log('status', status.data)
-      if (response.status === 200 && response.data?.users && status.status === 200) {
+      const statusRes = await axios.get(ADMIN_API_ENDPOINTS.loanstatus);
+      const statusCount = statusRes.data.statusCounts || { approved: 0, pending: 0, rejected: 0 };
+      if (response.status === 200 && response.data?.users && statusRes.status === 200) {
         setUsers(response.data.users);
-        setStatusCount(statusCount);
+        // Normalize all keys to lowercase so display always matches
+        setStatusCount({
+          approved: statusCount.approved || statusCount.Approved || 0,
+          pending:  statusCount.pending  || statusCount.Pending  || 0,
+          rejected: statusCount.rejected || statusCount.Rejected || 0,
+        });
       } else {
         setUsers([]);
       }
@@ -543,10 +546,14 @@ const generateAllUsersExcel = () => {
               </div>
               <button
                 className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#0b3324] hover:bg-[#ff8f6b] rounded-xl border border-[#1b5840] hover:border-[#ff8f6b] transition-all duration-200 shadow-sm cursor-pointer"
-                onClick={() => navigate('/')}
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  sessionStorage.removeItem('token');
+                  navigate('/login');
+                }}
               >
                 <FaLock className="text-[#34d399]" />
-                <span>Public Site</span>
+                <span>Logout</span>
               </button>
             </div>
           </div>
@@ -669,7 +676,7 @@ const generateAllUsersExcel = () => {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-[#5f8574] uppercase tracking-wider">Approved Loans</p>
-                  <p className="font-serif-editorial text-3xl font-black text-[#15803d] mt-0.5">{status.Approved || 0}</p>
+                  <p className="font-serif-editorial text-3xl font-black text-[#15803d] mt-0.5">{status.approved || 0}</p>
                 </div>
               </div>
 
@@ -689,7 +696,7 @@ const generateAllUsersExcel = () => {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-[#5f8574] uppercase tracking-wider">Declined</p>
-                  <p className="font-serif-editorial text-3xl font-black text-[#b91c1c] mt-0.5">{status.Rejected || 0}</p>
+                  <p className="font-serif-editorial text-3xl font-black text-[#b91c1c] mt-0.5">{status.rejected || 0}</p>
                 </div>
               </div>
             </div>
@@ -703,7 +710,7 @@ const generateAllUsersExcel = () => {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-[#e6f4ea] border border-[#c1e8d5] p-5 rounded-2xl flex flex-col items-center justify-center text-center">
                     <p className="text-xs font-bold text-[#15803d] uppercase tracking-wider">Approved</p>
-                    <p className="font-serif-editorial text-3xl font-black text-[#15803d] mt-1">{status.Approved || 0}</p>
+                    <p className="font-serif-editorial text-3xl font-black text-[#15803d] mt-1">{status.approved || 0}</p>
                     <span className="text-[11px] text-[#166534] mt-1 font-semibold">Funds Disbursed</span>
                   </div>
                   <div className="bg-[#fef9c3] border border-[#fde047]/60 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
@@ -713,7 +720,7 @@ const generateAllUsersExcel = () => {
                   </div>
                   <div className="bg-[#fee2e2] border border-[#fca5a5]/60 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
                     <p className="text-xs font-bold text-[#b91c1c] uppercase tracking-wider">Rejected</p>
-                    <p className="font-serif-editorial text-3xl font-black text-[#b91c1c] mt-1">{status.Rejected || 0}</p>
+                    <p className="font-serif-editorial text-3xl font-black text-[#b91c1c] mt-1">{status.rejected || 0}</p>
                     <span className="text-[11px] text-[#991b1b] mt-1 font-semibold">Ineligible</span>
                   </div>
                 </div>
@@ -977,10 +984,11 @@ const generateAllUsersExcel = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
-                              <img 
-                                className="h-10 w-10 rounded-full object-cover" 
-                                src={user.profileImage}
-                                alt={user.name} 
+                             <img 
+                                className="h-10 w-10 rounded-full object-cover bg-[#e2f3e9]" 
+                                src={user.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.StudentName || 'U')}&background=c1e8d5&color=072a1e&bold=true`}
+                                alt={user.StudentName || 'User'}
+                                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.StudentName || 'U')}&background=c1e8d5&color=072a1e&bold=true`; }}
                               />
                             </div>
                             <div className="ml-4">
@@ -1041,7 +1049,7 @@ const generateAllUsersExcel = () => {
 
       {/* AI Fund Allocation Pipeline Tab Content */}
       {activeTab === 'ai-pipeline' && (
-        <AiPipelineView onApproved={() => { fetchUsers(); }} />
+        <AiPipelineView onApplicationUpdated={() => { fetchUsers(); }} />
       )}
       </main>
 
@@ -1053,17 +1061,25 @@ const generateAllUsersExcel = () => {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">User Details</h3>
           <table className="min-w-full text-sm text-left mb-6">
             <tbody>
-              <tr><td className="font-semibold pr-4">Name:</td><td>{selectedUser.StudentName || selectedUser.name}</td></tr>
-              <tr><td className="font-semibold pr-4">Phone number:</td><td>{selectedUser.phoneNo || selectedUser.phoneNo}</td></tr>
-              <tr><td className="font-semibold pr-4">Email:</td><td>{selectedUser.email}</td></tr>
-              <tr><td className="font-semibold pr-4">Department:</td><td>{selectedUser.Dept || selectedUser.department}</td></tr>
-              <tr><td className="font-semibold pr-4">Semester:</td><td>{selectedUser.semester || selectedUser.semester}</td></tr>
-              <tr><td className="font-semibold pr-4">CNIC:</td><td>{selectedUser.cnic}</td></tr>
-              <tr><td className="font-semibold pr-4">Verified:</td><td>{selectedUser.isVerified === true || selectedUser.isVerified === 'true' ? 'Verified' : 'Not Verified'}</td></tr>
-              <tr><td className="font-semibold pr-4">Registration Date:</td><td>{selectedUser.registrationDate}</td></tr>
-              <tr><td className="font-semibold pr-4">Profile Image:</td>
-                <td>
-                  <img src={selectedUser.profileImage} alt="Profile" className="h-16 w-16 rounded-full object-cover" />
+              <tr><td className="font-semibold pr-4 py-1">Name:</td><td>{selectedUser.StudentName || selectedUser.name || 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Phone:</td><td>{selectedUser.phoneNo || selectedUser.phoneNumber || 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Email:</td><td>{selectedUser.email || 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Department:</td><td>{selectedUser.Dept || selectedUser.department || 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Semester:</td><td>{selectedUser.semester || 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">CNIC:</td><td>{selectedUser.cnic || 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Verified:</td><td>{selectedUser.isVerified === true || selectedUser.isVerified === 'true' ? '✓ Verified' : 'Not Verified'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Registration Date:</td><td>{selectedUser.registrationDate ? new Date(selectedUser.registrationDate).toLocaleDateString() : 'N/A'}</td></tr>
+              <tr><td className="font-semibold pr-4 py-1">Profile Image:</td>
+                <td className="py-1">
+                  <img 
+                    src={selectedUser.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.StudentName || selectedUser.name || 'User')}&background=072a1e&color=fff`} 
+                    alt="Profile" 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.StudentName || selectedUser.name || 'User')}&background=072a1e&color=fff`;
+                    }}
+                    className="h-16 w-16 rounded-full object-cover border border-gray-200" 
+                  />
                 </td>
               </tr>
             </tbody>
@@ -1071,7 +1087,7 @@ const generateAllUsersExcel = () => {
           <div className="flex justify-end">
             <button
               onClick={() => { setShowModal(false); setSelectedUser(null); }}
-              className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800"
+              className="bg-[#072a1e] hover:bg-[#0c402e] text-white px-5 py-2 rounded-xl text-sm font-semibold transition"
             >
               Close
             </button>

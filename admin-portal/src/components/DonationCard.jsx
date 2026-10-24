@@ -141,10 +141,12 @@ const DonationStatusCard = () => {
     }
   };
 
-  // Calculate percentage change
-  const percentageChange = donationData.thisMonth.amount_pkr && donationData.thisMonth.amount_usd > 0 
-    ? ((donationData.thisMonth.amount_pkr - donationData.lastMonth.amount_pkr) / donationData.lastMonth.amount_pkr) * 1000 
-    : 0;
+  // Calculate percentage change (this month vs last month PKR)
+  const lastMonthAmt = donationData.lastMonth.amount_pkr;
+  const thisMonthAmt = donationData.thisMonth.amount_pkr;
+  const percentageChange = lastMonthAmt > 0
+    ? Math.round(((thisMonthAmt - lastMonthAmt) / lastMonthAmt) * 100)
+    : thisMonthAmt > 0 ? 100 : 0;
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-[#d8ede1] p-6">
