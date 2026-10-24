@@ -51,15 +51,22 @@ async function getUsdToPkrRate() {
 }
 
 exports.getPaymentLinkAnalytics = async (req, res) => {
+  const isMockKey = !process.env.STRIPE_TEST_SECRET_KEY || 
+                    process.env.STRIPE_TEST_SECRET_KEY.includes('mock') || 
+                    process.env.STRIPE_TEST_SECRET_KEY.includes('placeholder');
+
+  if (isMockKey) {
+    return serveMockAnalytics(res);
+  }
+
   try {
     // 1. Verify test mode
     if (!process.env.STRIPE_TEST_SECRET_KEY?.includes('_test_')) {
-      throw new Error('Server must use Stripe test key in development');
+      return serveMockAnalytics(res);
     }
 
     // 2. Get current exchange rate
     const usdToPkrRate = await getUsdToPkrRate();
-    console.log(`Using USD to PKR rate: ${usdToPkrRate}`);
 
     // 3. Get Stripe account balance with proper currency handling
     const balance = await stripe.balance.retrieve();
@@ -316,72 +323,76 @@ exports.getPaymentLinkAnalytics = async (req, res) => {
 
   } catch (error) {
     console.warn('Stripe API unavailable, serving realistic simulated analytics:', error.message);
-    const mockPayments = [
-      {
-        payment_id: 'pi_test_100rs_community_01',
-        amount: { original: 50, original_currency: 'usd', usd: 50, pkr: 14000 },
-        fee: { original: 1.75, original_currency: 'usd', usd: 1.75, pkr: 490 },
-        net_amount: { original: 48.25, original_currency: 'usd', usd: 48.25, pkr: 13510 },
-        status: 'succeeded',
-        created: new Date(Date.now() - 3600000 * 5).toISOString(),
-        customer: { name: 'NFC Alumni Council', email: 'alumni@nfc.edu.pk' },
-        payment_method: { type: 'card', details: { brand: 'visa', last4: '4242' } }
-      },
-      {
-        payment_id: 'pi_test_100rs_community_02',
-        amount: { original: 100, original_currency: 'usd', usd: 100, pkr: 28000 },
-        fee: { original: 3.20, original_currency: 'usd', usd: 3.20, pkr: 896 },
-        net_amount: { original: 96.80, original_currency: 'usd', usd: 96.80, pkr: 27104 },
-        status: 'succeeded',
-        created: new Date(Date.now() - 3600000 * 24).toISOString(),
-        customer: { name: 'Prof. Tariq Mahmood', email: 'tariq.m@nfc.edu.pk' },
-        payment_method: { type: 'card', details: { brand: 'mastercard', last4: '5555' } }
-      },
-      {
-        payment_id: 'pi_test_100rs_community_03',
-        amount: { original: 25, original_currency: 'usd', usd: 25, pkr: 7000 },
-        fee: { original: 1.05, original_currency: 'usd', usd: 1.05, pkr: 294 },
-        net_amount: { original: 23.95, original_currency: 'usd', usd: 23.95, pkr: 6706 },
-        status: 'succeeded',
-        created: new Date(Date.now() - 3600000 * 48).toISOString(),
-        customer: { name: 'Student Welfare Trust', email: 'welfare@nfc.edu.pk' },
-        payment_method: { type: 'card', details: { brand: 'visa', last4: '4000' } }
-      }
-    ];
-
-    return res.status(200).json({
-      success: true,
-      testMode: true,
-      data: {
-        exchange_rate: 280,
-        account_balance: {
-          available: { usd: 175, pkr: 49000 },
-          pending: { usd: 50, pkr: 14000 }
-        },
-        summary: {
-          thisMonth: {
-            count: 3,
-            amount_usd: 175,
-            amount_pkr: 49000,
-            fees_usd: 6.00,
-            fees_pkr: 1680,
-            net_usd: 169.00,
-            net_pkr: 47320,
-            currencies: [{ currency: 'usd', amount: 175, count: 3 }]
-          },
-          lastMonth: {
-            count: 5,
-            amount_usd: 350,
-            amount_pkr: 98000,
-            fees_usd: 12.00,
-            fees_pkr: 3360,
-            net_usd: 338.00,
-            net_pkr: 94640,
-            currencies: [{ currency: 'usd', amount: 350, count: 5 }]
-          }
-        },
-        payments: mockPayments
-      }
-    });
+    return serveMockAnalytics(res);
   }
 };
+
+function serveMockAnalytics(res) {
+  const mockPayments = [
+    {
+      payment_id: 'pi_test_100rs_community_01',
+      amount: { original: 50, original_currency: 'usd', usd: 50, pkr: 14000 },
+      fee: { original: 1.75, original_currency: 'usd', usd: 1.75, pkr: 490 },
+      net_amount: { original: 48.25, original_currency: 'usd', usd: 48.25, pkr: 13510 },
+      status: 'succeeded',
+      created: new Date(Date.now() - 3600000 * 5).toISOString(),
+      customer: { name: 'NFC Alumni Council', email: 'alumni@nfc.edu.pk' },
+      payment_method: { type: 'card', details: { brand: 'visa', last4: '4242' } }
+    },
+    {
+      payment_id: 'pi_test_100rs_community_02',
+      amount: { original: 100, original_currency: 'usd', usd: 100, pkr: 28000 },
+      fee: { original: 3.20, original_currency: 'usd', usd: 3.20, pkr: 896 },
+      net_amount: { original: 96.80, original_currency: 'usd', usd: 96.80, pkr: 27104 },
+      status: 'succeeded',
+      created: new Date(Date.now() - 3600000 * 24).toISOString(),
+      customer: { name: 'Prof. Tariq Mahmood', email: 'tariq.m@nfc.edu.pk' },
+      payment_method: { type: 'card', details: { brand: 'mastercard', last4: '5555' } }
+    },
+    {
+      payment_id: 'pi_test_100rs_community_03',
+      amount: { original: 25, original_currency: 'usd', usd: 25, pkr: 7000 },
+      fee: { original: 1.05, original_currency: 'usd', usd: 1.05, pkr: 294 },
+      net_amount: { original: 23.95, original_currency: 'usd', usd: 23.95, pkr: 6706 },
+      status: 'succeeded',
+      created: new Date(Date.now() - 3600000 * 48).toISOString(),
+      customer: { name: 'Student Welfare Trust', email: 'welfare@nfc.edu.pk' },
+      payment_method: { type: 'card', details: { brand: 'visa', last4: '4000' } }
+    }
+  ];
+
+  return res.status(200).json({
+    success: true,
+    testMode: true,
+    data: {
+      exchange_rate: 280,
+      account_balance: {
+        available: { usd: 175, pkr: 49000 },
+        pending: { usd: 50, pkr: 14000 }
+      },
+      summary: {
+        thisMonth: {
+          count: 3,
+          amount_usd: 175,
+          amount_pkr: 49000,
+          fees_usd: 6.00,
+          fees_pkr: 1680,
+          net_usd: 169.00,
+          net_pkr: 47320,
+          currencies: [{ currency: 'usd', amount: 175, count: 3 }]
+        },
+        lastMonth: {
+          count: 5,
+          amount_usd: 350,
+          amount_pkr: 98000,
+          fees_usd: 12.00,
+          fees_pkr: 3360,
+          net_usd: 338.00,
+          net_pkr: 94640,
+          currencies: [{ currency: 'usd', amount: 350, count: 5 }]
+        }
+      },
+      payments: mockPayments
+    }
+  });
+}

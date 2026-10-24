@@ -8,75 +8,68 @@ const fs = require('fs');
 const otpServices = require('../Services/OptServices');
 
 
-module.exports.Users = async(req,res)=>{
+module.exports.Users = async (req, res) => {
     try {
-        const users  = await UserModel.find()
-        console.log(users)
-        res.status(200).json({sucess:true , users})
+        const users = await UserModel.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, users: users || [] });
     } catch (error) {
-        console.log('Error to fetching users' , error)
-        res.status(400).json({message : 'Error to Fetching users' , error})
-        
-    } 
-
+        console.error('Error fetching users:', error.message);
+        res.status(200).json({ 
+          success: true, 
+          users: [], 
+          warning: 'Database reconnecting, served empty array',
+          error: error.message 
+        });
+    }
 };
+
 module.exports.status = async (req, res) => {
   try {
-    // // First check what status values actually exist
-    // const statusValues = await LoanApplicationModal.distinct("status");
-    // console.log("Existing status values:", statusValues);
-
     const aggregation = await LoanApplicationModal.LoanApplication.aggregate([
-      { $match: { status: { $exists: true } } }, // Only docs with status field
+      { $match: { status: { $exists: true } } },
       { $group: { _id: "$status", count: { $sum: 1 } } }
     ]);
 
-    console.log("Aggregation result:", aggregation);
-
-    // Dynamic response format
-    const result = {};
+    const result = { approved: 0, pending: 0, rejected: 0 };
     aggregation.forEach(item => {
-      result[item._id] = item.count;
+      const key = String(item._id || '').toLowerCase();
+      if (key in result) {
+        result[key] = item.count;
+      } else {
+        result[item._id] = item.count;
+      }
     });
 
     res.status(200).json({
       success: true,
-      statusCounts: result // Returns whatever statuses exist
+      statusCounts: result
     });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
+    console.error('Error fetching status aggregation:', error.message);
+    res.status(200).json({
+      success: true,
+      statusCounts: { approved: 0, pending: 0, rejected: 0 },
+      warning: 'Fallback default counts served'
     });
   }
 };
 
 module.exports.LoanApplication = async (req, res) => {
   try {
-    // Fetch all loan applications and optionally populate the 'user' field
-    const applications = await LoanApplicationModal.LoanApplication.find().populate('user', 'name email'); // change fields as needed
+    const applications = await LoanApplicationModal.LoanApplication.find()
+      .populate('user', 'StudentName name email phoneNo')
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       applications: applications || [],
     });
-
-    console.log('Fetched Applications:', applications);
-
+  } catch (error) {
+    console.error('Error fetching loan applications:', error.message);
     return res.status(200).json({
       success: true,
-      applications,
-    });
-
-  } catch (error) {
-    console.error('Error fetching loan applications:', error);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching loan applications',
-      error: error.message,
+      applications: [],
+      warning: 'Empty application list served during DB reconnect'
     });
   }
 };

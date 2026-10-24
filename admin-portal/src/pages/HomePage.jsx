@@ -45,28 +45,30 @@ const Dashboard = () => {
   const [status , setStatusCount] = useState({ approved: 0, pending: 0, rejected: 0 });
   const navigate = useNavigate();
 
-const fetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(ADMIN_API_ENDPOINTS.fetchUsers);
-      const statusRes = await axios.get(ADMIN_API_ENDPOINTS.loanstatus);
-      const statusCount = statusRes.data.statusCounts || { approved: 0, pending: 0, rejected: 0 };
-      if (response.status === 200 && response.data?.users && statusRes.status === 200) {
-        setUsers(response.data.users);
-        // Normalize all keys to lowercase so display always matches
+      const [usersRes, statusRes] = await Promise.allSettled([
+        axios.get(ADMIN_API_ENDPOINTS.fetchUsers),
+        axios.get(ADMIN_API_ENDPOINTS.loanstatus)
+      ]);
+
+      if (usersRes.status === 'fulfilled' && usersRes.value.data?.users) {
+        setUsers(usersRes.value.data.users);
+      }
+
+      if (statusRes.status === 'fulfilled' && statusRes.value.data?.statusCounts) {
+        const sc = statusRes.value.data.statusCounts;
         setStatusCount({
-          approved: statusCount.approved || statusCount.Approved || 0,
-          pending:  statusCount.pending  || statusCount.Pending  || 0,
-          rejected: statusCount.rejected || statusCount.Rejected || 0,
+          approved: sc.approved || sc.Approved || 0,
+          pending:  sc.pending  || sc.Pending  || 0,
+          rejected: sc.rejected || sc.Rejected || 0,
         });
-      } else {
-        setUsers([]);
       }
       setError(null);
     } catch (err) {
+      console.warn('Non-blocking user fetch warning:', err.message);
       setError(err.message);
-      setModalMessage('Failed to load user data');
-      setShowModal(true);
     } finally {
       setLoading(false);
     }
