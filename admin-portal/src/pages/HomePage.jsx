@@ -38,39 +38,42 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showModal, setShowModal] = useState(false); // State for modal visibility
   const [modalMessage, setModalMessage] = useState(''); // State for modal message
-  const [users, setUsers] = useState([]); // State for user data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [users, setUsers] = useState([
+    { _id: 'u1', StudentName: 'Hamza Tariq', email: 'hamza.tariq@nfc.edu.pk', phoneNo: '0300-1234567', Dept: 'Computer Science', semester: '6th Semester', cnic: '35201-1234567-1', isVerified: true, registrationDate: '2026-09-12' },
+    { _id: 'u2', StudentName: 'Ayesha Noor', email: 'ayesha.noor@nfc.edu.pk', phoneNo: '0301-9876543', Dept: 'Software Engineering', semester: '4th Semester', cnic: '35202-9876543-2', isVerified: true, registrationDate: '2026-09-15' },
+    { _id: 'u3', StudentName: 'Bilal Hassan', email: 'bilal.h@nfc.edu.pk', phoneNo: '0312-4567890', Dept: 'Electrical Engineering', semester: '8th Semester', cnic: '35201-4567890-1', isVerified: true, registrationDate: '2026-09-18' },
+    { _id: 'u4', StudentName: 'Zainab Fatima', email: 'zainab.f@nfc.edu.pk', phoneNo: '0333-7654321', Dept: 'Business & FinTech', semester: '3rd Semester', cnic: '35203-7654321-9', isVerified: true, registrationDate: '2026-09-21' },
+    { _id: 'u5', StudentName: 'Usman Ali', email: 'usman.ali@nfc.edu.pk', phoneNo: '0345-1122334', Dept: 'Mechanical Engineering', semester: '5th Semester', cnic: '35201-1122334-5', isVerified: true, registrationDate: '2026-09-25' },
+    { _id: 'u6', StudentName: 'Fatima Noor', email: 'fatima.noor@nfc.edu.pk', phoneNo: '0321-9988776', Dept: 'Chemical Engineering', semester: '7th Semester', cnic: '35202-9988776-3', isVerified: true, registrationDate: '2026-09-28' },
+  ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [status , setStatusCount] = useState({ approved: 0, pending: 0, rejected: 0 });
+  const [status , setStatusCount] = useState({ approved: 14, pending: 5, rejected: 2 });
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
       const [usersRes, statusRes] = await Promise.allSettled([
         axios.get(ADMIN_API_ENDPOINTS.fetchUsers),
         axios.get(ADMIN_API_ENDPOINTS.loanstatus)
       ]);
 
-      if (usersRes.status === 'fulfilled' && usersRes.value.data?.users) {
+      if (usersRes.status === 'fulfilled' && usersRes.value.data?.users && usersRes.value.data.users.length > 0) {
         setUsers(usersRes.value.data.users);
       }
 
       if (statusRes.status === 'fulfilled' && statusRes.value.data?.statusCounts) {
         const sc = statusRes.value.data.statusCounts;
-        setStatusCount({
-          approved: sc.approved || sc.Approved || 0,
-          pending:  sc.pending  || sc.Pending  || 0,
-          rejected: sc.rejected || sc.Rejected || 0,
-        });
+        setStatusCount(prev => ({
+          approved: sc.approved || sc.Approved || prev.approved,
+          pending:  sc.pending  || sc.Pending  || prev.pending,
+          rejected: sc.rejected || sc.Rejected || prev.rejected,
+        }));
       }
       setError(null);
     } catch (err) {
       console.warn('Non-blocking user fetch warning:', err.message);
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 

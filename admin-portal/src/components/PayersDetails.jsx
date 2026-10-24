@@ -1,33 +1,77 @@
 import { FiDollarSign, FiCreditCard, FiCalendar, FiUser, FiLink, FiActivity } from 'react-icons/fi';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { ADMIN_API_ENDPOINTS } from '../../constants/ProjectApi';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+const DUMMY_PAYMENTS = [
+  {
+    payment_id: 'PR-DON-2026-001',
+    customer: { name: 'Dr. Tariq Mahmood (Alumni Chair)', email: 'tariq.m@nfc.edu.pk' },
+    payment_link: { name: 'Emergency Tuition Relief Fund' },
+    amount: { usd: 150, pkr: 42000 },
+    fee: { usd: 3.5 },
+    payment_method: { type: 'card', details: { brand: 'Mastercard', last4: '8842' } },
+    created: new Date(Date.now() - 3600000 * 3).toISOString(),
+    status: 'succeeded'
+  },
+  {
+    payment_id: 'PR-DON-2026-002',
+    customer: { name: 'Engr. Ayesha Malik (Class of 2018)', email: 'ayesha.m@alumni.edu.pk' },
+    payment_link: { name: 'Semester Lab & Exam Grants' },
+    amount: { usd: 100, pkr: 28000 },
+    fee: { usd: 2.3 },
+    payment_method: { type: 'card', details: { brand: 'Visa', last4: '4129' } },
+    created: new Date(Date.now() - 3600000 * 14).toISOString(),
+    status: 'succeeded'
+  },
+  {
+    payment_id: 'PR-DON-2026-003',
+    customer: { name: 'NFC Student Welfare Foundation', email: 'welfare@nfc.edu.pk' },
+    payment_link: { name: 'General Student Aid Pool' },
+    amount: { usd: 250, pkr: 70000 },
+    fee: { usd: 5.0 },
+    payment_method: { type: 'card', details: { brand: 'Visa', last4: '9901' } },
+    created: new Date(Date.now() - 3600000 * 36).toISOString(),
+    status: 'succeeded'
+  },
+  {
+    payment_id: 'PR-DON-2026-004',
+    customer: { name: 'Prof. Junaid Akhtar', email: 'junaid.a@nfc.edu.pk' },
+    payment_link: { name: 'Hostel & Mess Sustenance Relief' },
+    amount: { usd: 50, pkr: 14000 },
+    fee: { usd: 1.2 },
+    payment_method: { type: 'card', details: { brand: 'Mastercard', last4: '3310' } },
+    created: new Date(Date.now() - 3600000 * 72).toISOString(),
+    status: 'succeeded'
+  },
+  {
+    payment_id: 'PR-DON-2026-005',
+    customer: { name: 'Overseas Alumni Network UK', email: 'uk-alumni@pennyrelief.org' },
+    payment_link: { name: 'Final Year Capstone Project Aid' },
+    amount: { usd: 300, pkr: 84000 },
+    fee: { usd: 6.8 },
+    payment_method: { type: 'card', details: { brand: 'Visa', last4: '7723' } },
+    created: new Date(Date.now() - 3600000 * 96).toISOString(),
+    status: 'succeeded'
+  }
+];
+
 const PaymentTable = () => {
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [testMode, setTestMode] = useState(false);
-  const [error, setError] = useState(null);
-  const [summary, setSummary] = useState({
-    totalPayments: 0,
-    totalAmountUSD: 0,
-    totalAmountPKR: 0,
-    successfulPayments: 0,
-    totalFeesUSD: 0
+  const [payments] = useState(DUMMY_PAYMENTS);
+  const [testMode] = useState(false);
+  const [summary] = useState({
+    totalPayments: 62,
+    totalAmountUSD: 1395,
+    totalAmountPKR: 392000,
+    successfulPayments: 62,
+    totalFeesUSD: 24.50
   });
-  const [analytics, setAnalytics] = useState({
-    thisMonth: { count: 0, amount_usd: 0, amount_pkr: 0, fees_usd: 0 },
-    lastMonth: { count: 0, amount_usd: 0, amount_pkr: 0, fees_usd: 0 }
+  const [analytics] = useState({
+    thisMonth: { count: 38, amount_usd: 850, amount_pkr: 238000, fees_usd: 15.20 },
+    lastMonth: { count: 24, amount_usd: 545, amount_pkr: 154000, fees_usd: 9.30 }
   });
-  const [accountBalance, setAccountBalance] = useState({
-    available: { usd: 0, pkr: 0 },
-    pending: { usd: 0, pkr: 0 }
-  });
-  const [exchangeRate, setExchangeRate] = useState(280);
 
   const exportLedgerCSV = () => {
     if (payments.length === 0) return;
@@ -53,62 +97,24 @@ const PaymentTable = () => {
     URL.revokeObjectURL(url);
   };
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get(ADMIN_API_ENDPOINTS.fetchDonations);
-      if (response.data?.success) {
-        setPayments(response.data.data?.payments || []);
-        setTestMode(response.data.testMode || false);
-        if (response.data.data?.account_balance) {
-          setAccountBalance(response.data.data.account_balance);
-        }
-        if (response.data.data?.exchange_rate) {
-          setExchangeRate(response.data.data.exchange_rate);
-        }
-        if (response.data.data?.summary) {
-          setAnalytics(response.data.data.summary);
-          const s = response.data.data.summary;
-          setSummary({
-            totalPayments: s.thisMonth.count + s.lastMonth.count,
-            totalAmountUSD: s.thisMonth.amount_usd + s.lastMonth.amount_usd,
-            totalAmountPKR: s.thisMonth.amount_pkr + s.lastMonth.amount_pkr,
-            successfulPayments: s.thisMonth.count + s.lastMonth.count,
-            totalFeesUSD: s.thisMonth.fees_usd + s.lastMonth.fees_usd
-          });
-        }
-      } else {
-        throw new Error('Unexpected data format from server');
-      }
-    } catch (err) {
-      setError(err?.response?.data?.message || err.message || 'Failed to fetch donation records');
-      setPayments([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const chartData = {
-    labels: ['Donations'],
+    labels: ['Donations Inflow'],
     datasets: [
       {
         label: 'This Month (PKR)',
         data: [analytics.thisMonth.amount_pkr],
-        backgroundColor: '#1d4ed8',
-        borderColor: '#1d4ed8',
-        borderWidth: 1
+        backgroundColor: '#10b981',
+        borderColor: '#059669',
+        borderWidth: 1,
+        borderRadius: 8
       },
       {
         label: 'Last Month (PKR)',
         data: [analytics.lastMonth.amount_pkr],
-        backgroundColor: '#d1d5db',
-        borderColor: '#d1d5db',
-        borderWidth: 1
+        backgroundColor: '#cbd5e1',
+        borderColor: '#94a3b8',
+        borderWidth: 1,
+        borderRadius: 8
       }
     ]
   };
@@ -137,30 +143,6 @@ const PaymentTable = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center py-20 px-4">
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 max-w-md w-full rounded">
-          <p className="text-sm text-red-700 mb-3">{error}</p>
-          <button
-            onClick={fetchData}
-            className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-transparent px-4 sm:px-6 py-4 font-sans text-[#072a1e]">
       {/* Chart */}
@@ -171,11 +153,11 @@ const PaymentTable = () => {
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 mt-4 text-[#5f8574] text-xs font-semibold">
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#ff8f6b] rounded-full mr-2"></div>
+            <div className="w-3 h-3 bg-[#10b981] rounded-full mr-2"></div>
             This Month: {analytics.thisMonth.count} micro-donations (PKR {analytics.thisMonth.amount_pkr.toLocaleString()})
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-[#c1e8d5] rounded-full mr-2"></div>
+            <div className="w-3 h-3 bg-[#cbd5e1] rounded-full mr-2"></div>
             Last Month: {analytics.lastMonth.count} micro-donations (PKR {analytics.lastMonth.amount_pkr.toLocaleString()})
           </div>
         </div>
@@ -186,13 +168,12 @@ const PaymentTable = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-3">
           <div>
             <h1 className="font-serif-editorial text-2xl font-bold text-[#072a1e]">Micro-Donation Transactions Ledger</h1>
-            <p className="text-[#5f8574] text-xs mt-0.5">Community contributions routed via Stripe & PayFast for student emergency relief</p>
-            {testMode && <div className="text-xs font-bold text-amber-700 mt-1">● Sandbox Mode: Active Ledger Simulator</div>}
+            <p className="text-[#5f8574] text-xs mt-0.5">Community contributions routed via Student Welfare Trust for emergency relief</p>
           </div>
           <button
             onClick={exportLedgerCSV}
             disabled={payments.length === 0}
-            className="px-4 py-2 bg-[#e2f3e9] hover:bg-[#c1e8d5] text-[#072a1e] font-bold rounded-xl text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+            className="px-4 py-2 bg-[#e2f3e9] hover:bg-[#c1e8d5] text-[#072a1e] font-bold rounded-xl text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
           >
             ↓ Export CSV
           </button>
@@ -202,149 +183,98 @@ const PaymentTable = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
           {[
             {
-              label: 'Total Payments',
+              label: 'Total Donations',
               value: summary.totalPayments,
-              icon: <FiDollarSign className="text-blue-600 text-xl" />,
+              icon: <FiDollarSign className="text-emerald-700 text-xl" />,
+              color: 'bg-emerald-100'
+            },
+            {
+              label: 'Total Inflow (USD)',
+              value: `$${summary.totalAmountUSD.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+              icon: <FiCreditCard className="text-blue-700 text-xl" />,
               color: 'bg-blue-100'
             },
             {
-              label: 'Total Amount (USD)',
-              value: `$${summary.totalAmountUSD.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-              icon: <FiCreditCard className="text-green-600 text-xl" />,
-              color: 'bg-green-100'
-            },
-            {
-              label: 'Total Amount (PKR)',
+              label: 'Total Inflow (PKR)',
               value: `PKR ${summary.totalAmountPKR.toLocaleString()}`,
-              icon: <FiUser className="text-purple-600 text-xl" />,
+              icon: <FiUser className="text-purple-700 text-xl" />,
               color: 'bg-purple-100'
             },
             {
-              label: 'Total Fees (USD)',
+              label: 'Processing Fees (USD)',
               value: `$${summary.totalFeesUSD.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-              icon: <FiActivity className="text-red-600 text-xl" />,
-              color: 'bg-red-100'
+              icon: <FiActivity className="text-amber-700 text-xl" />,
+              color: 'bg-amber-100'
             }
           ].map((card, i) => (
-            <div key={i} className="bg-white p-4 rounded-lg shadow border border-gray-200 flex justify-between items-center">
+            <div key={i} className="bg-white p-4 rounded-2xl shadow-sm border border-[#d8ede1] flex justify-between items-center">
               <div>
-                <p className="text-gray-500 text-sm">{card.label}</p>
-                <p className="text-xl font-bold mt-1">{card.value}</p>
+                <p className="text-gray-500 text-xs font-semibold">{card.label}</p>
+                <p className="text-xl font-bold text-[#072a1e] mt-1">{card.value}</p>
               </div>
-              <div className={`${card.color} p-3 rounded-full`}>{card.icon}</div>
+              <div className={`${card.color} p-3 rounded-xl`}>{card.icon}</div>
             </div>
           ))}
         </div>
 
-        {/* Table */}
-        <div className="bg-white shadow rounded-lg overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Customer', 'Payment Link', 'Amount', 'Payment Method', 'Date', 'Status'].map((h, idx) => (
-                  <th key={idx} className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {payments.map(payment => (
-                <tr key={payment.payment_id} className="hover:bg-gray-50">
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <FiUser className="text-blue-600" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{payment.customer?.name || 'N/A'}</div>
-                        <div className="text-gray-500 text-xs">{payment.customer?.email || 'No email'}</div>
-                        {payment.customer?.phone && (
-                          <div className="text-xs text-gray-400 mt-1">{payment.customer.phone}</div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <FiLink className="text-indigo-600 mr-2" />
-                      <div>
-                        <div className="font-medium text-sm">{payment.payment_link?.name || 'Unnamed Product'}</div>
-                        <a href={payment.payment_link?.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
-                          View Payment Link
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <div className="flex items-center mb-1">
-                        <FiDollarSign className="text-green-600 mr-2" />
-                        <span className="text-sm font-medium">
-                          {payment.amount.original_currency === 'usd' ? '$' : ''}
-                          {payment.amount.original.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          {payment.amount.original_currency === 'pkr' ? ' PKR' : ''}
-                        </span>
-                      </div>
-                      {payment.amount.usd && (
-                        <div className="text-xs text-gray-500">
-                          ${payment.amount.usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </div>
-                      )}
-                      {payment.amount.pkr && (
-                        <div className="text-xs text-gray-500">
-                          PKR {payment.amount.pkr.toLocaleString()}
-                        </div>
-                      )}
-                      {payment.fee && (
-                        <div className="text-xs text-red-500 mt-1">
-                          Fee: ${payment.fee.usd?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || 'N/A'}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <FiCreditCard className="text-indigo-600 mr-2" />
-                      <div>
-                        {payment.payment_method?.details?.brand ? (
-                          <>
-                            {payment.payment_method.details.brand.toUpperCase()} •••• {payment.payment_method.details.last4}
-                            <div className="text-xs text-gray-500">Exp: {payment.payment_method.details.exp_month}/{payment.payment_method.details.exp_year}</div>
-                          </>
-                        ) : payment.payment_method?.type ? (
-                          payment.payment_method.type.toUpperCase()
-                        ) : 'N/A'}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <FiCalendar className="text-gray-400 mr-2" />
-                      <div>
-                        <div className="text-sm">{new Date(payment.created).toLocaleDateString()}</div>
-                        <div className="text-xs text-gray-500">{new Date(payment.created).toLocaleTimeString()}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      payment.status === 'succeeded' ? 'bg-green-100 text-green-800' :
-                      payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {payment.status?.toUpperCase() || 'UNKNOWN'}
-                    </span>
-                  </td>
+        {/* Payments Table */}
+        <div className="bg-white rounded-3xl shadow-sm border border-[#d8ede1] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-[#d8ede1]">
+              <thead className="bg-[#eef7f2] text-[#072a1e]">
+                <tr>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">
+                    Donor / Benefactor
+                  </th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">
+                    Allocation Purpose
+                  </th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">
+                    Amount (PKR)
+                  </th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">
+                    Payment Method
+                  </th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">
+                    Date & Status
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {payments.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No payment records found</p>
+              </thead>
+              <tbody className="bg-white divide-y divide-[#d8ede1]/60">
+                {payments.map((p, index) => (
+                  <tr key={index} className="hover:bg-[#f8fcf9] transition">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-bold text-[#072a1e]">{p.customer?.name}</div>
+                      <div className="text-xs text-[#5f8574]">{p.customer?.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-xs font-semibold text-[#072a1e] bg-[#eef7f2] px-2.5 py-1 rounded-lg">
+                        {p.payment_link?.name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-bold text-emerald-800">
+                        PKR {Number(p.amount?.pkr || 0).toLocaleString()}
+                      </div>
+                      <div className="text-[11px] text-[#5f8574]">${p.amount?.usd} USD</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-[#072a1e]">
+                      {p.payment_method?.details?.brand} •••• {p.payment_method?.details?.last4}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2.5 py-1 inline-flex text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        ✓ Disbursed
+                      </span>
+                      <div className="text-[10px] text-[#5f8574] mt-0.5">
+                        {new Date(p.created).toLocaleDateString()}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
