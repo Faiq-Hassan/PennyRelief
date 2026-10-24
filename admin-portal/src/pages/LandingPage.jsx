@@ -59,9 +59,11 @@ export default function LandingPage() {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="h-10 w-10 rounded-2xl bg-[#072a1e] text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition-transform">
-              <FaUniversity className="text-[#34d399]" />
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="PennyRelief Logo"
+              className="h-11 w-11 rounded-2xl object-cover shadow-md group-hover:scale-105 transition-transform border border-[#34d399]/40"
+            />
             <div>
               <span className="font-serif-editorial font-bold text-2xl tracking-tight text-[#072a1e]">
                 penny relief

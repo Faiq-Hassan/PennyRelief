@@ -38,9 +38,11 @@ const LoginPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
-            <span className="text-white text-xl font-bold">Penny</span>
-          </div>
+          <img
+            src="/logo.jpg"
+            alt="PennyRelief"
+            className="w-24 h-24 rounded-3xl shadow-xl border-2 border-[#34d399]/40 object-cover"
+          />
         </div>
         
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

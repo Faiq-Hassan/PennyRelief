@@ -3,8 +3,8 @@ import { FaFilePdf, FaCheck, FaTimes, FaEye, FaTrash, FaSync } from 'react-icons
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import autoTable from 'jspdf-autotable';
 import { ADMIN_API_ENDPOINTS } from '../../constants/ProjectApi';
+import { generateExecutiveReliefPDF, generateIndividualVoucherPDF, SAMPLE_RELIEF_DATA } from '../utils/pdfGenerator';
 
 function Loan() {
   const [loanApplications, setLoanApplications] = useState([]);
@@ -94,257 +94,17 @@ function Loan() {
     setShowModal(true);
   };
 
-  const generateLoanPDF = (application) => {
-    const doc = new jsPDF();
-    
-    // Set document properties
-    doc.setProperties({
-        title: `Loan Application - ${application.studentName}`,
-        subject: 'Loan Application Details',
-        author: "PennyRelief",
-        creator: "PennyRelief Student Relief Admin Portal"
-    });
-
-    // Header
-    doc.setFontSize(20);
-    doc.setTextColor(17, 64, 140); // PennyRelief brand color
-    doc.setFont('helvetica', 'bold');
-    doc.text("PennyRelief • Student Aid", 105, 20, { align: 'center' });
-    
-    doc.setFontSize(14);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Loan Application Details', 105, 30, { align: 'center' });
-
-    // Horizontal line
-    doc.setDrawColor(17, 64, 140);
-    doc.setLineWidth(0.5);
-    doc.line(20, 35, 190, 35);
-
-    // Application ID
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Application ID: ${application._id}`, 105, 42, { align: 'center' });
-
-    // Student Information Section
-    doc.setFontSize(12);
-    doc.setTextColor(17, 64, 140);
-    doc.setFont('helvetica', 'bold');
-    doc.text("Student Information", 20, 55);
-    
-    doc.setDrawColor(200, 200, 200);
-    doc.line(20, 57, 60, 57);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.setFont('helvetica', 'normal');
-    
-    // Left column
-    doc.text(`Name: ${application.studentName}`, 20, 65);
-    doc.text(`Registration No: ${application.regNo}`, 20, 75);
-    doc.text(`Email: ${application.email}`, 20, 85);
-    doc.text(`Phone: ${application.phoneNo}`, 20, 95);
-    
-    // Right column
-    doc.text(`Department: ${application.dept}`, 110, 65);
-    doc.text(`Semester: ${application.semester}`, 110, 75);
-    doc.text(`CGPA: ${application.cgpa}`, 110, 85);
-
-    // Family Information Section
-    doc.setFontSize(12);
-    doc.setTextColor(17, 64, 140);
-    doc.setFont('helvetica', 'bold');
-    doc.text("Family Information", 20, 115);
-    doc.line(20, 117, 60, 117);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.setFont('helvetica', 'normal');
-    
-    doc.text(`Father's Name: ${application.fatherName}`, 20, 125);
-    doc.text(`Occupation: ${application.fatherOccupation}`, 20, 135);
-    doc.text(`Salary: PKR ${application.fatherSalary}`, 20, 145);
-    doc.text(`Siblings: ${application.siblings}`, 20, 155);
-
-    // Loan Details Section
-    doc.setFontSize(12);
-    doc.setTextColor(17, 64, 140);
-    doc.setFont('helvetica', 'bold');
-    doc.text("Loan Details", 110, 115);
-    doc.line(110, 117, 140, 117);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.setFont('helvetica', 'normal');
-    
-    doc.text(`Amount: PKR ${application.loanAmount}`, 110, 125);
-    doc.text(`Status: ${application.status}`, 110, 135);
-    doc.text(`Applied On: ${new Date(application.submittedAt).toLocaleDateString()}`, 110, 145);
-    
-    // Additional Notes (multi-line support)
-    const splitNotes = doc.splitTextToSize(`Additional Notes: ${application.additionalNotes}`, 80);
-    doc.text(splitNotes, 110, 155);
-
-    // Document Images Section
-    doc.setFontSize(12);
-    doc.setTextColor(17, 64, 140);
-    doc.setFont('helvetica', 'bold');
-    doc.text("Submitted Documents", 20, 175);
-    doc.line(20, 177, 60, 177);
-
-    // Calculate positions for images
-    const startY = 185;
-    const imgWidth = 40;
-    const imgHeight = 30;
-    const spacing = 10;
-
-    // CNIC Front Image
-    if (application.cnicFrontImage) {
-        doc.text("CNIC Front:", 20, startY);
-        doc.addImage(application.cnicFrontImage, 'JPEG', 20, startY + 5, imgWidth, imgHeight);
+  const generateLoanPDF = async (application) => {
+    try {
+      await generateIndividualVoucherPDF(application);
+    } catch (err) {
+      console.error('Error generating voucher PDF:', err);
     }
-
-    // CNIC Back Image
-    if (application.cnicBackImage) {
-        doc.text("CNIC Back:", 70, startY);
-        doc.addImage(application.cnicBackImage, 'JPEG', 70, startY + 5, imgWidth, imgHeight);
-    }
-
-    // Utility Bills (second row)
-    if (application.electricityBillImage) {
-        doc.text("Electricity Bill:", 20, startY + imgHeight + 15);
-        doc.addImage(application.electricityBillImage, 'JPEG', 20, startY + imgHeight + 20, imgWidth, imgHeight);
-    }
-
-    if (application.gasBillImage) {
-        doc.text("Gas Bill:", 70, startY + imgHeight + 15);
-        doc.addImage(application.gasBillImage, 'JPEG', 70, startY + imgHeight + 20, imgWidth, imgHeight);
-    }
-
-    if (application.waterBillImage) {
-        doc.text("Water Bill:", 120, startY + imgHeight + 15);
-        doc.addImage(application.waterBillImage, 'JPEG', 120, startY + imgHeight + 20, imgWidth, imgHeight);
-    }
-
-    // Footer
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Generated on ${new Date().toLocaleString()}`, 20, 280);
-    
-    doc.setFontSize(8);
-    doc.setTextColor(17, 64, 140);
-    doc.text("100's Rupee Bank - Confidential", 105, 290, { align: 'center' });
-
-    // Page border
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.rect(10, 10, 190, 280);
-
-    // Save the PDF
-    doc.save(`100sRupeeBank_LoanApplication_${application.regNo}_${application.studentName.replace(/\s+/g, '_')}.pdf`);
   };
 
-  const generateAllLoansPDF = () => {
+  const generateAllLoansPDF = async () => {
     try {
-      // Initialize jsPDF instance
-      const doc = new jsPDF();
-      
-      // Set document properties
-      doc.setProperties({
-        title: "All Loan Applications Report",
-        subject: 'Loan Applications Summary',
-        author: "PennyRelief",
-        creator: "PennyRelief Student Relief Admin Portal"
-      });
-
-      // Add header
-      doc.setFontSize(20);
-      doc.setTextColor(17, 64, 140); // PennyRelief brand color
-      doc.setFont('helvetica', 'bold');
-      doc.text("PennyRelief • Student Aid", 105, 15, { align: 'center' });
-      
-      doc.setFontSize(9);
-      doc.setTextColor(100, 100, 100);
-      doc.text('All Loan Applications Report', 105, 25, { align: 'center' });
-
-      // Prepare data for the table
-      const headers = [
-        ['App ID', 'Student', 'Reg No', 'Amount', 'Status', 'Applied On', 'Department']
-      ];
-      
-      const data = loanApplications.map(loan => [
-        loan._id.substring(0, 8) + '...', // Shorten ID for display
-        loan.studentName || 'N/A',
-        loan.regNo || 'N/A',
-        `PKR ${loan.loanAmount || '0'}`,
-        loan.status || 'Pending',
-        new Date(loan.submittedAt).toLocaleDateString(),
-        loan.dept || 'N/A'
-      ]);
-
-      // Generate the table using autoTable
-      autoTable(doc, {
-        head: headers,
-        body: data,
-        startY: 35,
-        styles: {
-          cellPadding: 5,
-          fontSize: 8,
-          valign: 'middle',
-          textColor: [60, 60, 60]
-        },
-        columnStyles: {
-          0: { cellWidth: 20 }, // App ID
-          1: { cellWidth: 30 }, // Student
-          2: { cellWidth: 20 }, // Reg No
-          3: { cellWidth: 20 }, // Amount
-          4: { cellWidth: 20 }, // Status
-          5: { cellWidth: 20 }, // Applied On
-          6: { cellWidth: 30 }  // Department
-        },
-        headStyles: {
-          fillColor: [17, 64, 140],
-          textColor: [255, 255, 255],
-          fontStyle: 'bold',
-          fontSize: 9
-        },
-        alternateRowStyles: {
-          fillColor: [240, 240, 240]
-        },
-        didDrawPage: function (data) {
-          // Add footer to each page
-          doc.setFontSize(5);
-          doc.setTextColor(150, 150, 150);
-          doc.text(`Page ${data.pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
-        }
-      });
-
-      // Add summary statistics
-      const totalLoans = loanApplications.length;
-      const approvedLoans = loanApplications.filter(loan => loan.status === 'Approved').length;
-      const pendingLoans = loanApplications.filter(loan => loan.status === 'Pending').length;
-      const totalAmount = loanApplications.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
-
-      doc.setFontSize(10);
-      doc.setTextColor(17, 64, 140);
-      doc.text('Summary Statistics:', 14, doc.lastAutoTable.finalY + 10);
-      
-      doc.setFontSize(9);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`Total Applications: ${totalLoans}`, 14, doc.lastAutoTable.finalY + 18);
-      doc.text(`Approved: ${approvedLoans}`, 14, doc.lastAutoTable.finalY + 26);
-      doc.text(`Pending: ${pendingLoans}`, 14, doc.lastAutoTable.finalY + 34);
-      doc.text(`Total Amount Requested: PKR ${totalAmount.toLocaleString()}`, 14, doc.lastAutoTable.finalY + 42);
-
-      // Add footer
-      const date = new Date().toLocaleString();
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Generated on ${date}`, 14, doc.internal.pageSize.height - 20);
-      doc.text("PennyRelief - Confidential Audit Record", 105, doc.internal.pageSize.height - 10, { align: 'center' });
-
-      // Save the PDF
-      doc.save(`PennyRelief_LoanApplications_${new Date().toISOString().split('T')[0]}.pdf`);
+      await generateExecutiveReliefPDF(loanApplications);
     } catch (error) {
       console.error('Error generating loan applications PDF:', error);
     }
@@ -398,8 +158,29 @@ function Loan() {
       </div>
       
       {loanApplications.length === 0 ? (
-        <div className="text-center p-8 text-gray-500">
-          No loan applications found
+        <div className="text-center py-12 px-6 rounded-2xl bg-[#f8fcf9] border border-dashed border-[#c1e8d5]">
+          <div className="mx-auto w-12 h-12 rounded-2xl bg-[#c1e8d5]/40 flex items-center justify-center text-[#072a1e] mb-3">
+            <FaFilePdf className="text-xl text-[#ff8f6b]" />
+          </div>
+          <h3 className="font-serif-editorial text-lg font-bold text-[#072a1e]">No Live Applications in Database</h3>
+          <p className="text-xs text-[#5f8574] max-w-md mx-auto mt-1 mb-5">
+            You can load realistic audited student relief records to test the table and preview the executive PDF ledger and individual voucher formats.
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-3">
+            <button
+              onClick={() => setLoanApplications(SAMPLE_RELIEF_DATA)}
+              className="bg-[#072a1e] hover:bg-[#0c402e] text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+            >
+              <span>Load 10 Sample Audited Applications</span>
+            </button>
+            <button
+              onClick={() => generateExecutiveReliefPDF(null)}
+              className="bg-[#ff8f6b] hover:bg-[#ff7a52] text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+            >
+              <FaFilePdf />
+              <span>Download Executive Audit PDF</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[#d8ede1]">

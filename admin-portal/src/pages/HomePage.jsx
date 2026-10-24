@@ -21,6 +21,7 @@ import DonationStatusCard from '../components/DonationCard';
 import AiPipelineView from '../components/AiPipelineView';
 import { useNavigate } from 'react-router-dom';
 import { ADMIN_API_ENDPOINTS } from '../../constants/ProjectApi';
+import { generateExecutiveReliefPDF, generateIndividualVoucherPDF, SAMPLE_RELIEF_DATA } from '../utils/pdfGenerator';
 
 // Register ChartJS components
 ChartJS.register(
@@ -204,78 +205,30 @@ const handleViewUser = (userId) => {
 
 
 const exportAllUsers = (format = 'pdf') => {
-  if (users.length === 0) {
-    setModalMessage('No users to export');
-    setShowModal(true);
-    return;
-  }
-
   if (format === 'pdf') {
     generateAllUsersPDF();
   } else {
+    if (users.length === 0) {
+      setModalMessage('No user records currently in database for Excel export.');
+      setShowModal(true);
+      return;
+    }
     generateAllUsersExcel();
   }
 };
 
-const generateAllUsersPDF = () => {
+const generateAllUsersPDF = async () => {
   try {
-    // Initialize jsPDF instance
-    const doc = new jsPDF();
-    
-    // Add header
-    doc.setFontSize(20);
-    doc.setTextColor(17, 64, 140); // PennyRelief brand color
-    doc.setFont('helvetica', 'bold');
-    doc.text("PennyRelief • Student Aid", 105, 15, { align: 'center' });
-    
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text('All Users Report', 105, 25, { align: 'center' });
-
-    // Prepare data for the table
-    const headers = [['ID', 'Name', 'Email', 'Department', 'Status']];
-    const data = users.map(user => [
-      user._id || 'N/A',
-      user.RegNo || user.registrationNumber || 'N/A',
-      user.profilePhoto ? user.profileImage : 'N/A',
-      user.StudentName || user.name || 'N/A',
-      user.email || 'N/A',
-      user.Dept || user.department || 'N/A',
-      user.status || 'N/A'
-    ]);
-
-    // Generate the table using the imported autoTable function
-    autoTable(doc, {
-      head: headers,
-      body: data,
-      startY: 35,
-      styles: {
-        cellPadding: 5,
-        fontSize: 10,
-        valign: 'middle'
-      },
-      headStyles: {
-        fillColor: [17, 64, 140],
-        textColor: [255, 255, 255],
-        fontStyle: 'bold'
-      },
-      alternateRowStyles: {
-        fillColor: [240, 240, 240]
-      }
-    });
-
-    // Add footer
-    const date = new Date().toLocaleString();
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Generated on ${date}`, 14, doc.lastAutoTable.finalY + 15);
-    doc.text("100's Rupwee Bank - Confidential", 105, doc.lastAutoTable.finalY + 25, { align: 'center' });
-
-    // Save the PDF
-    doc.save(`100sRupweeBank_Users_${new Date().toISOString().split('T')[0]}.pdf`);
+    setLoading(true);
+    await generateExecutiveReliefPDF(users);
+    setModalMessage('Official PennyRelief Executive Disbursal Audit Report downloaded successfully!');
+    setShowModal(true);
   } catch (error) {
     console.error('Error generating PDF:', error);
-    // You might want to show an error message to the user here
+    setModalMessage('Failed to generate PDF: ' + error.message);
+    setShowModal(true);
+  } finally {
+    setLoading(false);
   }
 };
 const generateAllUsersExcel = () => {
@@ -540,9 +493,11 @@ const generateAllUsersExcel = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-2xl bg-[#0b3324] border border-[#1b5840] flex items-center justify-center text-white shadow-lg text-2xl">
-                <FaUniversity className="text-[#34d399]" />
-              </div>
+              <img
+                src="/logo.jpg"
+                alt="PennyRelief Emblem"
+                className="h-12 w-12 rounded-2xl object-cover shadow-lg border border-[#34d399]/40"
+              />
               <div>
                 <div className="flex items-center space-x-2">
                   <h1 className="font-serif-editorial text-2xl md:text-3xl font-bold tracking-tight text-white">
@@ -564,16 +519,34 @@ const generateAllUsersExcel = () => {
             </div>
 
             <div className="flex items-center space-x-3 self-end md:self-center">
-              <div className="hidden sm:flex flex-col text-right">
+              {/* PDF Actions */}
+              <button
+                onClick={() => generateExecutiveReliefPDF(users)}
+                className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#ff8f6b] hover:bg-[#ff7a52] rounded-xl shadow-lg shadow-[#ff8f6b]/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                title="Download Official Multi-Student Audit Disbursal Ledger PDF"
+              >
+                <FaDownload className="text-xs" />
+                <span>Audit PDF</span>
+              </button>
+              <button
+                onClick={() => generateIndividualVoucherPDF()}
+                className="hidden sm:flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-emerald-100 bg-[#0b3324] hover:bg-[#134934] rounded-xl border border-[#34d399]/30 hover:border-[#34d399] transition-all cursor-pointer"
+                title="Download Official Individual Student Relief Voucher (Certificate PDF)"
+              >
+                <FaFilePdf className="text-xs text-[#34d399]" />
+                <span>Voucher PDF</span>
+              </button>
+
+              <div className="hidden lg:flex flex-col text-right pl-2 border-l border-emerald-900/40">
                 <span className="text-xs font-bold text-white">System Administrator</span>
                 <span className="text-xs font-mono text-emerald-300">admin@pennyrelief.org</span>
               </div>
               <button
-                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#0b3324] hover:bg-[#ff8f6b] rounded-xl border border-[#1b5840] hover:border-[#ff8f6b] transition-all duration-200 shadow-sm"
+                className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#0b3324] hover:bg-[#ff8f6b] rounded-xl border border-[#1b5840] hover:border-[#ff8f6b] transition-all duration-200 shadow-sm cursor-pointer"
                 onClick={() => navigate('/')}
               >
                 <FaLock className="text-[#34d399]" />
-                <span>Public Site / Logout</span>
+                <span>Public Site</span>
               </button>
             </div>
           </div>

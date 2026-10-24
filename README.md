@@ -1,5 +1,7 @@
 <div align="center">
  
+<img src="./admin-portal/public/logo.jpg" alt="PennyRelief Logo Emblem" width="160" style="border-radius: 50%; box-shadow: 0 10px 25px rgba(7,42,30,0.3);" />
+
 # 🪙 PennyRelief • Student Micro-Donation & Relief Bank
 ### *Never let financial need halt an education again.*
 #### *Autonomous Multi-Agent Student Micro-Donations & Emergency Relief System*
