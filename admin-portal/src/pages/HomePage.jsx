@@ -546,14 +546,10 @@ const generateAllUsersExcel = () => {
               </div>
               <button
                 className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#0b3324] hover:bg-[#ff8f6b] rounded-xl border border-[#1b5840] hover:border-[#ff8f6b] transition-all duration-200 shadow-sm cursor-pointer"
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  sessionStorage.removeItem('token');
-                  navigate('/login');
-                }}
+                onClick={() => navigate('/')}
+                title="View Public Landing Page"
               >
-                <FaLock className="text-[#34d399]" />
-                <span>Logout</span>
+                <span>Landing Page</span>
               </button>
             </div>
           </div>
