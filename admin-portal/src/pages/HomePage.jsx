@@ -21,7 +21,7 @@ import DonationStatusCard from '../components/DonationCard';
 import AiPipelineView from '../components/AiPipelineView';
 import { useNavigate } from 'react-router-dom';
 import { ADMIN_API_ENDPOINTS } from '../../constants/ProjectApi';
-import { generateExecutiveReliefPDF, generateIndividualVoucherPDF, SAMPLE_RELIEF_DATA } from '../utils/pdfGenerator';
+import { generateExecutiveReliefPDF, generateIndividualVoucherPDF, generateRegisteredStudentsPDF, SAMPLE_RELIEF_DATA } from '../utils/pdfGenerator';
 
 // Register ChartJS components
 ChartJS.register(
@@ -228,8 +228,8 @@ const exportAllUsers = (format = 'pdf') => {
 const generateAllUsersPDF = async () => {
   try {
     setLoading(true);
-    await generateExecutiveReliefPDF(users);
-    setModalMessage('Official PennyRelief Executive Disbursal Audit Report downloaded successfully!');
+    await generateRegisteredStudentsPDF(users);
+    setModalMessage('Official PennyRelief Registered Students Directory PDF downloaded successfully!');
     setShowModal(true);
   } catch (error) {
     console.error('Error generating PDF:', error);
